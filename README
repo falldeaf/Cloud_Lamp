@@ -1,0 +1,18 @@
+Cloud Lamp Project
+-author: falldeaf
+-date  : June 20, 2013
+
+Python files -
+lampd.py is the main daemon, lamp controller and web server
+daily_lamp_update.py updates the weather and surf pickles
+
+Pickle's -
+surf.p    python pickle file with surf/wave info that gets read by lampd.py and written by the daily_lamp_update.py program
+weather.p same but for weather
+
+wwwlamp dir -
+HTML, CSS javascript/Jquery files that make the webpage that user interact with
+
+test_scripts dir -
+This directory contains individual tests for much of the functionality, these files will be simpler and easier to understand if you're picking apart code.
+
