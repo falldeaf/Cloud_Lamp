@@ -1,6 +1,7 @@
 Cloud Lamp Project
--author: falldeaf
--date  : June 20, 2013
+-author  : falldeaf
+-date    : June 20, 2013
+-descrip : Python, html, javascript and CSS for a web based API controller for a rasberry pi connected to a light-bulb tailswitch and string of ws2801 LED's
 
 Python files -
 lampd.py is the main daemon, lamp controller and web server
