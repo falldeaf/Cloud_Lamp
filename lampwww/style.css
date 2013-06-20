@@ -1,0 +1,107 @@
+*
+{
+	margin:0px;
+	padding:0px;
+}
+
+body
+{
+	padding:0px;
+	margin:0px;
+	background-repeat: no-repeat;
+	
+	/* background:-webkit-gradient(linear, 0% 100%, 0% 20%, from(#85a000), to(#1a1f01));
+	background:-moz-linear-gradient(#1a1f01 20%, #85a000); */
+	font-size:14px;
+ 	font: 62.5%/1.5 Helvetica Neue, Helvetica, Arial, "Lucida Grande", "Lucida Sans", Verdana, sans-serif;
+}
+
+#main_container
+{
+	width:341px;
+	margin: 20px auto;
+	background-color:#333;
+	padding: 16px;
+}
+
+#logo_header
+{
+	width:342px;
+	height:213px;
+	background-image:url(img/logo.png);
+	background-position: 4px 4px;
+	background-repeat:no-repeat;
+	margin-bottom:12px;
+}
+
+#bulb_toggle
+{
+	width:342px;
+	height:73px;
+	/* background-color:#F90; */
+	background-image:url(img/bulb-button.png);
+	background-position: 4px 4px;
+	background-repeat:no-repeat;
+	cursor:pointer;
+}
+
+.button
+{
+	width:342px;
+	height:103px;
+	margin-top:12px;
+	background-color:#E9E9E9;
+	cursor:pointer;
+}
+
+.ring_display
+{
+	float:left;
+	margin-left:12px;
+	margin-top:12px;
+	height:80px;
+	width:81px;
+	background-repeat:no-repeat;
+}
+
+.button_overlay
+{
+	float:right;
+	width:233px;
+	height:95px;
+	margin-right:4px;
+	margin-top:4px;
+}
+
+#none_display { background-image:url(img/no-display.png); }
+#none_button_overlay { background-image:url(img/no-button.png); }
+
+#rain_display { background-image:url(img/rain-display.png); }
+#rain_button_overlay { background-image:url(img/rain-button.png); }
+
+#clock_display { background-image:url(img/clock-display.png); }
+#clock_button_overlay { background-image:url(img/clock-button.png); }
+
+#color_display { background-image:url(img/color-display.png); }
+#color_button_overlay { background-image:url(img/color-button.png); }
+
+#home_display { background-image:url(img/home-display.png); }
+#home_button_overlay { background-image:url(img/home-button.png); }
+
+/* Color Scheme /*
+
+/* background */
+body { background-color: #A52959; }
+
+/* logo */
+#logo_header { background-color:#7CE700; }
+
+/* mode (selected/unselected) */
+.selected {	background-color:#FFAD73; }
+.notselected { background-color:#FF6A00; }
+.hovercolor { background-color:#BF6B30; }
+
+/* bulb (on/off) */
+.bulb_default { background-color:#E9E9E9; }
+.bulb_on { background-color:#5DD0C0; }
+.bulb_off { background-color:#00685A; }

@@ -1,0 +1,14 @@
+import RPi.GPIO as io, time
+io.setmode(io.BCM) 
+
+motor_pin = 18 
+power_pin = 21
+led_pin = 17
+
+
+io.setup(power_pin, io.OUT)
+io.output(power_pin, True)
+
+io.setup(led_pin, io.OUT)
+io.output(led_pin, True)
+time.sleep(60)
