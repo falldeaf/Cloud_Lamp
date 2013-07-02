@@ -179,6 +179,23 @@ def rainbowcycle(pixels, wait):
 	writestrip(pixels)
 	time.sleep(wait)
 
+def strobe(pixels):
+	global count
+
+	if count == 0:
+		strobe_color = Color(4,4,4)
+		count += 1
+	else:
+		strobe_color = Color(6,6,6)
+		count = 0
+
+	for i in range(len(pixels)):
+		setpixelcolor(pixels, i, strobe_color)
+
+	writestrip(pixels)
+	time.sleep(0.04)
+		
+
 def clockdraw(pixels):
 	hour = 60 / int(time.strftime('%l'))
 	minute = int(time.strftime('%M'))
@@ -200,10 +217,8 @@ def clockdraw(pixels):
 			c = Color(255,0,255)
 		if i == second:
 			c = Color(255,255,255)
-
 	
 		setpixelcolor(pixels, i, c)
-
 
 	#setpixelcolor(pixels, random.randint(0,len(pixels)), Color(r,g,b))
 	writestrip(pixels)

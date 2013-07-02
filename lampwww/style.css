@@ -82,8 +82,8 @@ body
 #clock_display { background-image:url(img/clock-display.png); }
 #clock_button_overlay { background-image:url(img/clock-button.png); }
 
-#color_display { background-image:url(img/color-display.png); }
-#color_button_overlay { background-image:url(img/color-button.png); }
+#strobe_display { background-image:url(img/strobe-display.png); }
+#strobe_button_overlay { background-image:url(img/strobe-button.png); }
 
 #home_display { background-image:url(img/home-display.png); }
 #home_button_overlay { background-image:url(img/home-button.png); }
