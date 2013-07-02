@@ -6,6 +6,7 @@ import json, urllib, urllib2, time, os, datetime
 from bs4 import BeautifulSoup
 import reports
 import cPickle as pickle
+import random
 
 from twisted.web.server import Site
 from twisted.web.resource import Resource
@@ -13,8 +14,10 @@ from twisted.internet import reactor
 from twisted.web.static import File
 import cgi
 
+from websocket import create_connection
 import socket
 
+pleds = [0] * 60
 count = 0
 conn = 0
 addr = 0
@@ -79,9 +82,9 @@ class lampAPI(Resource):
 
 		elif 'status' in request.args:
 			if request.args['status'][0] == "1":
-				return getStatus()
+				return getstatus()
 
-def getStatus():
+def getstatus():
 	global MODE
 	global BULB
 	global STROBE
@@ -156,16 +159,22 @@ def Wheel(WheelPos):
 		WheelPos -= 170;
 		return Color(0, WheelPos * 3, 255 - WheelPos * 3)
 
-def rainbowCycle(pixels, wait):
+def offmode(pixels):
+	for i in range(len(pixels)):
+		setpixelcolor(pixels, i, Color(0,0,0) )
+	writestrip(pixels)
+	time.sleep(1)	
+
+def rainbowcycle(pixels, wait):
 	for j in range(256): # one cycle of all 256 colors in the wheel
-    	   for i in range(len(pixels)):
-# tricky math! we use each pixel as a fraction of the full 96-color wheel
-# (thats the i / strip.numPixels() part)
-# Then add in j which makes the colors go around per pixel
-# the % 96 is to make the wheel cycle around
-      		setpixelcolor(pixels, i, Wheel( ((i * 256 / len(pixels)) + j) % 256) )
-	   writestrip(pixels)
-	   time.sleep(wait)
+		for i in range(len(pixels)):
+		# tricky math! we use each pixel as a fraction of the full 96-color wheel
+		# (thats the i / strip.numPixels() part)
+		# Then add in j which makes the colors go around per pixel
+		# the % 96 is to make the wheel cycle around
+			setpixelcolor(pixels, i, Wheel( ((i * 256 / len(pixels)) + j) % 256) )
+	writestrip(pixels)
+	time.sleep(wait)
 
 def clockdraw(pixels):
 	hour = 60 / int(time.strftime('%l'))
@@ -199,7 +208,14 @@ def clockdraw(pixels):
 	#print(time.strftime('%l:%M%S'))
 
 def infodisplay(pixels):
-	infostring_delimiter = Color(4,4,4)
+	global count
+
+	if count == 0:
+		infostring_delimiter = Color(4,4,4)
+		count += 1
+	else:
+		infostring_delimiter = Color(6,6,6)
+		count = 0
 
 	#pixels 1-11
 	#Surf report
@@ -242,20 +258,44 @@ def infodisplay(pixels):
 	writestrip(pixels)
 	time.sleep(0.2)
 
-def rainSim(pixels):
-	global count	
+def rainsim(pixels):
+        global pleds
 
-	if count == 0:
-		for i in range(len(pixels)):
-			setpixelcolor(pixels, i, Color(0,0,0))
-	elif count == 1:
-		for i in range(len(pixels)):
-			setpixelcolor(pixels, i, Color(255,255,255))
-		count = -1
+	for e in range(len(pleds)):
+		if pleds[e] > 99:
+			if pleds[e] > 106 and pleds[e] < 113:
+				setpixelcolor(pixels, e, Color(0,0,0))
+			elif pleds[e] > 130:
+				pleds[e] = -1
+			else:
+				setpixelcolor(pixels, e, Color(20,20,20) )
+			pleds[e] += 1
+		elif pleds[e] > 0:
+			if pleds[e] > 12:
+				pleds[e] = 0
+			else:
+				pleds[e] += 1
+			setpixelcolor(pixels, e, Color(0,0, pleds[e] * 20 ))
+		else:
+			setpixelcolor(pixels, e, Color(0,0,0))
+
+		if random.randint(1,100)  == 5 and pleds[e] == 0:
+				pleds[e] = 1
+
+	if random.randint(1,600) == 5:
+		for e in range(len(pleds)):
+			pleds[e] = 100
 
 	writestrip(pixels)
-	time.sleep(0.03)
-	count += 1
+	time.sleep(0.01)
+
+def startRainOnXBMC():
+
+	url="http://192.168.1.147:3480/data_request?id=action&output_format=xml&DeviceNum=81&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1"
+	req = urllib2.urlopen(url)
+
+	ws = create_connection("ws://192.168.1.149:9090/jsonrpc")
+	ws.send( "{\"jsonrpc\": \"2.0\", \"method\": \"Player.Open\", \"params\":{\"item\": {\"file\" : \"plugin://plugin.video.youtube/?action=play_video&videoid=aE47I6V-J28\" }}, \"id\" : \"1\"} " )
 
 def datastream(pixels):
 	global MODE
@@ -269,7 +309,7 @@ def datastream(pixels):
 	s.listen(1)
 	conn, addr = s.accept()
 
-	while(1):
+	while True:
 		try:
 			data = conn.recv(1024)
 		except Exception:
@@ -305,12 +345,15 @@ while True:
         reactor.iterate()
 	if MODE == -1:
 		datastream(ledpixels)
+	if MODE == 0:
+		#lights off, but keep turning them off in case interference turns some on
+		offmode(ledpixels)
 	if MODE == 1:
-		rainSim(ledpixels)
+		rainsim(ledpixels)
 	if MODE == 2:
 		clockdraw(ledpixels)
 	if MODE == 3:
-		rainbowCycle(ledpixels, 0.00)
+		rainbowcycle(ledpixels, 0.00)
 	if MODE == 4:
 		infodisplay(ledpixels)
 
