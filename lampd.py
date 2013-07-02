@@ -66,9 +66,12 @@ class lampAPI(Resource):
 				MODE = 0
 				return "<html> mode set to 0 </html>"
 			if request.args['mode'][0] == "1":
+				colorwipe(ledpixels, Color(0, 0, 0), 0)
+				startRainOnXBMC()
 				MODE = 1
 				return "<html> mode set to 1 </html>"
 			if request.args['mode'][0] == "2":
+				colorwipe(ledpixels, Color(0, 0, 0), 0)
 				MODE = 2
 				return "<html> mode set to 2 </html>"
 			if request.args['mode'][0] == "3":
