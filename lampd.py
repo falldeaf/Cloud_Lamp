@@ -30,6 +30,7 @@ GPIO.setmode(GPIO.BCM)
 power_pin = 17
 GPIO.setup(power_pin, GPIO.OUT)
 
+#This function gets request variables and uses them to change modes, toggle the bulbs and get status updates
 class lampAPI(Resource):
 	def render_GET(self, request):
 		global MODE
@@ -67,7 +68,8 @@ class lampAPI(Resource):
 				return "<html> mode set to 0 </html>"
 			if request.args['mode'][0] == "1":
 				colorwipe(ledpixels, Color(0, 0, 0), 0)
-				startRainOnXBMC()
+				#experimental function: when rain simulator starts put rain sounds on using the XBMC remote API calls
+				#startRainOnXBMC()
 				MODE = 1
 				return "<html> mode set to 1 </html>"
 			if request.args['mode'][0] == "2":
@@ -87,6 +89,7 @@ class lampAPI(Resource):
 			if request.args['status'][0] == "1":
 				return getstatus()
 
+#Return a string containing the current status of the Cloud Lamp
 def getstatus():
 	global MODE
 	global BULB
@@ -106,6 +109,7 @@ def getstatus():
 	#print jsonString
 	return jsonString
 
+#The following functions are taken from Lady Ada's Raspberry Pi ws2801 test code
 def slowspiwrite(clockpin, datapin, byteout):
 	GPIO.setup(clockpin, GPIO.OUT)
 	GPIO.setup(datapin, GPIO.OUT)
@@ -179,14 +183,15 @@ def rainbowcycle(pixels, wait):
 	writestrip(pixels)
 	time.sleep(wait)
 
+#This mode is a Strobe light
 def strobe(pixels):
 	global count
 
 	if count == 0:
-		strobe_color = Color(4,4,4)
+		strobe_color = Color(255,255,255)
 		count += 1
 	else:
-		strobe_color = Color(6,6,6)
+		strobe_color = Color(0,0,0)
 		count = 0
 
 	for i in range(len(pixels)):
@@ -195,7 +200,7 @@ def strobe(pixels):
 	writestrip(pixels)
 	time.sleep(0.04)
 		
-
+#This function draws a clock
 def clockdraw(pixels):
 	hour = 60 / int(time.strftime('%l'))
 	minute = int(time.strftime('%M'))
@@ -206,7 +211,7 @@ def clockdraw(pixels):
 	threequarter = 46
 
 	for i in range(len(pixels)):
-
+		#Change these colors for the theme of the clock, the very next color is the background color
 		c = Color(0,10,10)
 
 		if i == one or i == quarter or i == half or i == threequarter:
@@ -225,6 +230,9 @@ def clockdraw(pixels):
 	time.sleep(1)
 	#print(time.strftime('%l:%M%S'))
 
+#This mode is a live update of my MicasaVerde System, the Surf report and the Weather report
+#Micasa reports are updated live on every loop
+#Surf and Weather reports are 'pickled' and written down daily using the Cron and only read on each loop
 def infodisplay(pixels):
 	global count
 
@@ -241,6 +249,7 @@ def infodisplay(pixels):
 	surf_color_array = [ Color(0,0,4), Color(0,4,2), Color(4,4,0), Color(4,2,0) ]
 	#surf_report_array = surf_report()
 	try:
+		#Get the surf array from a pickled python list
 		surf_report_array = pickle.load( open( "surf.p", "rb" ) )
 		setpixelcolor(pixels, surf_offset - 1, infostring_delimiter)
 		for i in range(len(surf_report_array)):
@@ -254,6 +263,7 @@ def infodisplay(pixels):
         weather_color_array = [ Color(0,4,4), Color(0,0,4), Color(4,4,0), Color(4,4,4) ]
         #weather_report_array = weather_report()
 	try:
+		#Get the weather report from a pickled python list
 		weather_report_array = pickle.load( open( "weather.p", "rb" ) )
 		setpixelcolor(pixels, weather_offset - 1, infostring_delimiter)
 	        for i in range(len(weather_report_array)):
@@ -266,6 +276,7 @@ def infodisplay(pixels):
         micasa_offset = 32
         micasa_color_array = [ Color(4,0,4), Color(0,0,4), Color(0,4,0), Color(4,0,0) ]
 	try:
+		#Get the micasa report from the reports function
 	        micasa_report_array = reports.micasa_report()
 		setpixelcolor(pixels, micasa_offset - 1, infostring_delimiter)
 		for i in range(len(micasa_report_array)):
@@ -276,30 +287,42 @@ def infodisplay(pixels):
 	writestrip(pixels)
 	time.sleep(0.2)
 
+#This function simulates rain and lighting effects
 def rainsim(pixels):
         global pleds
 
+	#loop through each LED
 	for e in range(len(pleds)):
+		#This branch is the lightning effect and happens for all LED's at once
 		if pleds[e] > 99:
+			#to make the lightning blink once, put a black period in the middle
 			if pleds[e] > 106 and pleds[e] < 113:
 				setpixelcolor(pixels, e, Color(0,0,0))
+			#animation is over
 			elif pleds[e] > 130:
 				pleds[e] = -1
+			#draw all the lightning pixels
 			else:
 				setpixelcolor(pixels, e, Color(20,20,20) )
 			pleds[e] += 1
+		#This branch is the rain effect and hits LED's randomly
 		elif pleds[e] > 0:
+			#animation is over
 			if pleds[e] > 12:
 				pleds[e] = 0
+			#increment to the next animation frame
 			else:
 				pleds[e] += 1
+			#draw the rain pixel with increasing brightness depending on animation frame
 			setpixelcolor(pixels, e, Color(0,0, pleds[e] * 20 ))
 		else:
 			setpixelcolor(pixels, e, Color(0,0,0))
 
+		#This will randomly select an LED to start a rain effect
 		if random.randint(1,100)  == 5 and pleds[e] == 0:
 				pleds[e] = 1
 
+	#this selects a random time to start the lighting effect
 	if random.randint(1,600) == 5:
 		for e in range(len(pleds)):
 			pleds[e] = 100
@@ -307,14 +330,16 @@ def rainsim(pixels):
 	writestrip(pixels)
 	time.sleep(0.01)
 
+#this experimental function will turn on the television and start playing a video with rain sound effects
 def startRainOnXBMC():
 
-	url="http://192.168.1.147:3480/data_request?id=action&output_format=xml&DeviceNum=81&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1"
+	url="http://IPHERE:3480/data_request?id=action&output_format=xml&DeviceNum=81&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1"
 	req = urllib2.urlopen(url)
 
-	ws = create_connection("ws://192.168.1.149:9090/jsonrpc")
+	ws = create_connection("ws://IPHERE:9090/jsonrpc")
 	ws.send( "{\"jsonrpc\": \"2.0\", \"method\": \"Player.Open\", \"params\":{\"item\": {\"file\" : \"plugin://plugin.video.youtube/?action=play_video&videoid=aE47I6V-J28\" }}, \"id\" : \"1\"} " )
 
+#this experimental function will allow the LED's to be controlled remotely
 def datastream(pixels):
 	global MODE
 
@@ -351,6 +376,7 @@ def datastream(pixels):
 		writestrip(pixels)
 
 #root = Resource()
+#this is the directory where the Web interface code lives
 root = File("lampwww")
 #root.putChild("", File("lampwww"))
 root.putChild("API", lampAPI())
@@ -359,6 +385,7 @@ factory = Site(root)
 reactor.listenTCP(80, factory)
 reactor.startRunning(False)
 
+#The primary loop, each loop is one drawn frame and one check to see if we have a new web request
 while True:
         reactor.iterate()
 	if MODE == -1:
@@ -371,7 +398,8 @@ while True:
 	if MODE == 2:
 		clockdraw(ledpixels)
 	if MODE == 3:
-		rainbowcycle(ledpixels, 0.00)
+		#rainbowcycle(ledpixels, 0.00)
+		strobe(ledpixels)
 	if MODE == 4:
 		infodisplay(ledpixels)
 
