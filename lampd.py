@@ -245,11 +245,11 @@ def infodisplay(pixels):
 
 	#pixels 1-11
 	#Surf report
+	#Get the surf array from a pickled python list
 	surf_offset = 2
 	surf_color_array = [ Color(0,0,4), Color(0,4,2), Color(4,4,0), Color(4,2,0) ]
 	#surf_report_array = surf_report()
 	try:
-		#Get the surf array from a pickled python list
 		surf_report_array = pickle.load( open( "surf.p", "rb" ) )
 		setpixelcolor(pixels, surf_offset - 1, infostring_delimiter)
 		for i in range(len(surf_report_array)):
@@ -259,11 +259,11 @@ def infodisplay(pixels):
 
         #pixels 15-25
         #Weather report
+	#Get the weather report from a pickled python list
         weather_offset = 17
         weather_color_array = [ Color(0,4,4), Color(0,0,4), Color(4,4,0), Color(4,4,4) ]
         #weather_report_array = weather_report()
 	try:
-		#Get the weather report from a pickled python list
 		weather_report_array = pickle.load( open( "weather.p", "rb" ) )
 		setpixelcolor(pixels, weather_offset - 1, infostring_delimiter)
 	        for i in range(len(weather_report_array)):
