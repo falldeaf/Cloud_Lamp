@@ -1,10 +1,10 @@
 (lp1
-I3
+I1
 aI1
 aI1
 aI1
+aI2
 aI1
-aI3
 aI1
 aI1
 aI1

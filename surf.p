@@ -1,9 +1,9 @@
 (lp1
-I1
-aI1
-aI1
+I0
 aI1
 aI0
+aI1
+aI1
 aI1
 aI1
 a.
